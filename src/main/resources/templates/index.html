@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments :: samples-header"></head>
+<body>
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">Sample Int</h4>
+            <h6>Sample Int description...</h6>
+            <div class="form-group">
+                <br/><br/><br/>
+                <h5>Say hello to:</h5>
+                <form action="/run", id="sampleform">
+                    <p><input type="submit" value="Run Workflow" class="btn btn-primary" />
+                        <input type="reset" value="Reset Form" class="btn btn-secondary" />
+                </form>
+            </div>
+        </div>
+        <div style="width: 18rem;">
+            <div>
+                <h5 class="card-title">Workflow result:</h5>
+                <div id="result"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $("#sampleform").submit(function( event ) {
+        event.preventDefault();
+
+        var loader_img = '<img src="/img/spin.gif" alt="Loading" />';
+        $( "#result" ).empty().append( loader_img );
+
+        var $form = $( this ),
+            timer = $form.find( "input[name='timer']" ).val(),
+            url = $form.attr( "action" );
+
+        $.ajax({
+            'url': url,
+            'method':'POST',
+            'dataType': 'json',
+            'contentType': 'application/json',
+            'data':JSON.stringify({
+                "timer": timer,
+            }),
+            success: function(response) {
+                $( "#result" ).empty().append( response.message );
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert("Status: " + textStatus); alert("Error: " + errorThrown);
+            }
+        });
+    });
+</script>
+</body>
+</html>
