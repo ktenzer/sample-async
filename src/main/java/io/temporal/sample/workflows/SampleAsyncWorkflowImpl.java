@@ -58,10 +58,6 @@ public class SampleAsyncWorkflowImpl implements SampleAsyncWorkflow {
 
             Workflow.continueAsNew(input);
             return new SampleResult("Parent wf: result, continue-as-new");
-            // fail execution
-            //throw ApplicationFailure.newFailure("Workflow timeout, failing workflow", "TimerFired");
-
-
         } else {
             // cancel timer so TimerFired does not get delivered to our worker
             // in case timer does fire before or at the time we want to complete execution
