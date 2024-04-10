@@ -74,7 +74,6 @@ public class SampleAsyncWorkflowImpl implements SampleAsyncWorkflow {
         awaitingPause = false;
     }
 
-    // Query method implementation
     @Override
     public boolean isPaused() {
         return awaitingPause;
