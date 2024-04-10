@@ -53,10 +53,6 @@ public class SampleAsyncWorkflowImpl implements SampleAsyncWorkflow {
         if (timerPromise.isCompleted() && !activitiesPromise.isCompleted()) {
             activityCancellationScope.cancel("timer fired");
 
-            // Upsert search attribute `paused` to true before blocking
-            Map<String, Object> searchAttributes = new HashMap<>();
-            searchAttributes.put("paused", true);
-
             // Wait for the pause signal
             Workflow.await(() -> !awaitingPause);
 
