@@ -7,6 +7,6 @@ import io.temporal.sample.model.SampleResult;
 public interface SampleActivities {
     SampleResult one();
     SampleResult two();
-    SampleResult three();
+    SampleResult three(Boolean isFailed);
     SampleResult four();
 }

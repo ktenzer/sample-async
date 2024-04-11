@@ -26,8 +26,14 @@ public class SampleActivitiesImpl implements SampleActivities {
     }
 
     @Override
-    public SampleResult three() {
+    public SampleResult three(Boolean isFailed) {
         sleep(1);
+
+        if (isFailed) {
+            throw ApplicationFailure.newNonRetryableFailure("simulated activity failure from three",
+            "some error", null);
+        }
+
         return new SampleResult("Activity three done...");
     }
 
