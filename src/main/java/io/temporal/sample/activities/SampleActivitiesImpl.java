@@ -6,6 +6,7 @@ import io.temporal.spring.boot.ActivityImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import java.util.concurrent.ThreadLocalRandom;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ public class SampleActivitiesImpl implements SampleActivities {
     @Override
     public SampleResult one() {
         log.info("Activity one started...");
-        sleep(1);
+        randomSleep();
 
         thisMayOrMayNotThrowAnError("one");
 
@@ -29,7 +30,7 @@ public class SampleActivitiesImpl implements SampleActivities {
     @Override
     public SampleResult two() {
         log.info("Activity two started...");
-        sleep(1);
+        randomSleep();
 
         thisMayOrMayNotThrowAnError("two");
 
@@ -39,7 +40,7 @@ public class SampleActivitiesImpl implements SampleActivities {
     @Override
     public SampleResult three() {
         log.info("Activity three started...");
-        sleep(1);
+        randomSleep();
 
         thisMayOrMayNotThrowAnError("three");
 
@@ -49,7 +50,7 @@ public class SampleActivitiesImpl implements SampleActivities {
     @Override
     public SampleResult four() {
         log.info("Activity four started...");
-        sleep(1);
+        randomSleep();
 
         thisMayOrMayNotThrowAnError("four");
 
@@ -64,11 +65,25 @@ public class SampleActivitiesImpl implements SampleActivities {
         }
     }
 
+    private void randomSleep() {
+        try {
+            // Generate a random number between 2 and 11
+            int randomNumber = ThreadLocalRandom.current().nextInt(2, 11);
+            System.out.println("Sleeping for " + randomNumber + " seconds...");
+
+            // Sleep for the random number of seconds (startToClose is 10 seconds)
+            Thread.sleep(randomNumber * 1000); // 10% failure
+            System.out.println("Awake after sleeping for " + randomNumber + " seconds.");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }    
+
     private void thisMayOrMayNotThrowAnError(String activityName) {
         Random random = new Random();
         double randomValue = random.nextDouble();
         log.info("**** Random value: {}", randomValue);
-        if (randomValue < 0.33) { // 33% chance of failure
+        if (randomValue < 0.10) { // 10% chance of failure
             log.info("Activity {} failed...", activityName);
             throw ApplicationFailure.newNonRetryableFailure("simulated failure from " + activityName,
                     "some error", null);

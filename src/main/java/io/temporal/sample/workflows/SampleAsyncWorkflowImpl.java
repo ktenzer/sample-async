@@ -24,44 +24,46 @@ public class SampleAsyncWorkflowImpl implements SampleAsyncWorkflow {
             partialResults = new HashMap<>();
         }
 
-        try {
-            SampleResult result1 = partialResults.get("resultOne");
-            if (result1 == null) {
-                result1 = activities.one();
-                partialResults.put("resultOne", result1);
+        while (true) {
+            try {
+                SampleResult result1 = partialResults.get("resultOne");
+                if (result1 == null) {
+                    result1 = activities.one();
+                    partialResults.put("resultOne", result1);
+                }
+
+                SampleResult result2 = partialResults.get("resultTwo");
+                if (result2 == null) {
+                    result2 = activities.two();
+                    partialResults.put("resultTwo", result2);
+                }
+
+                SampleResult result3 = partialResults.get("resultThree");
+                if (result3 == null) {
+                    result3 = activities.three();
+                    partialResults.put("resultThree", result3);
+                }
+
+                SampleResult result4 = partialResults.get("resultFour");
+                if (result4 == null) {
+                    result4 = activities.four();
+                    partialResults.put("resultFour", result4);
+                }
+
+                return new SampleResult("Workflow complete");
+                // all activities have completed successfully
+            } catch (ActivityFailure e) {
+                log.info("Activity failed: {}", e.getMessage());
+
+                // Wait for the pause signal and the start the workflow from the beginning
+                log.info("Pausing workflow, waiting for 'resume' signal...");
+                Workflow.await(() -> !awaitingPause);
+
+                awaitingPause = true;
+
+                log.info("Resuming workflow...");
             }
-
-            SampleResult result2 = partialResults.get("resultTwo");
-            if (result2 == null) {
-                result2 = activities.two();
-                partialResults.put("resultTwo", result2);
-            }
-
-            SampleResult result3 = partialResults.get("resultThree");
-            if (result3 == null) {
-                result3 = activities.three();
-                partialResults.put("resultThree", result3);
-            }
-
-            SampleResult result4 = partialResults.get("resultFour");
-            if (result4 == null) {
-                result4 = activities.four();
-                partialResults.put("resultFour", result4);
-            }
-
-            // all activities have completed successfully
-        } catch (ActivityFailure e) {
-            log.info("Activity failed: {}", e.getMessage());
-
-            // Wait for the pause signal and the start the workflow from the beginning
-            log.info("Pausing workflow, waiting for 'resume' signal...");
-            Workflow.await(() -> !awaitingPause);
-
-            log.info("Resuming workflow by continuing as new...");
-            Workflow.continueAsNew(input, partialResults);
         }
-
-        return new SampleResult("Workflow complete");
     }
 
     @Override
