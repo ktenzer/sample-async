@@ -1,7 +1,7 @@
 ## Sample INT
 
 ### Start app
-      
+
      mvn clean install spring-boot:run
 
 ### Access app
