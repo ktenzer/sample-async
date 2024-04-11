@@ -38,7 +38,7 @@ public class SampleIntController {
                                 .setWorkflowId("sample-workflow")
                                 .build());
         try {
-            return new ResponseEntity<>(workflow.run(input), HttpStatus.OK);
+            return new ResponseEntity<>(workflow.run(input, null), HttpStatus.OK);
         } catch (WorkflowFailedException e) {
             return new ResponseEntity<>(new SampleResult("workflow failed: " + e.getMessage()), HttpStatus.OK);
         }

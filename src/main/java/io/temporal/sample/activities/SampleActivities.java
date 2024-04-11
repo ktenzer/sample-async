@@ -6,7 +6,10 @@ import io.temporal.sample.model.SampleResult;
 @ActivityInterface
 public interface SampleActivities {
     SampleResult one();
+
     SampleResult two();
-    SampleResult three(Boolean isFailed);
+
+    SampleResult three();
+
     SampleResult four();
 }

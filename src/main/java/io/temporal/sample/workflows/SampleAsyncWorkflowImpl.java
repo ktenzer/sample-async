@@ -1,52 +1,72 @@
 package io.temporal.sample.workflows;
 
 import io.temporal.failure.ActivityFailure;
-import io.temporal.failure.ApplicationFailure;
 import io.temporal.sample.activities.SampleActivities;
 import io.temporal.sample.model.SampleInput;
 import io.temporal.sample.model.SampleResult;
 import io.temporal.spring.boot.WorkflowImpl;
-import io.temporal.workflow.*;
+import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 
-import java.time.Duration;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 @WorkflowImpl(taskQueues = "samplequeue")
 public class SampleAsyncWorkflowImpl implements SampleAsyncWorkflow {
-    private final Logger logger = Workflow.getLogger(SampleAsyncWorkflowImpl.class);
+    private final Logger log = Workflow.getLogger(SampleAsyncWorkflowImpl.class);
     // note per-activity options are set in TemporalOptionsConfig
     private final SampleActivities activities = Workflow.newActivityStub(SampleActivities.class);
-    private Promise<Void> activitiesPromise;
-    Promise<Void> timerPromise;
     private boolean awaitingPause = true;
 
     @Override
-    public SampleResult run(SampleInput input) {
+    public SampleResult run(SampleInput input, HashMap<String, SampleResult> partialResults) {
 
-        // Generate random boolean to fail activity
-        Random rd = new Random(); 
-        Boolean isFailed = rd.nextBoolean();
+        if (partialResults == null) {
+            partialResults = new HashMap<>();
+        }
 
         try {
-            activities.one();
-            activities.two();
-            activities.three(isFailed);
-            activities.four();
+            SampleResult result1 = partialResults.get("resultOne");
+            if (result1 == null) {
+                result1 = activities.one();
+                partialResults.put("resultOne", result1);
+            }
+
+            SampleResult result2 = partialResults.get("resultTwo");
+            if (result2 == null) {
+                result2 = activities.two();
+                partialResults.put("resultTwo", result2);
+            }
+
+            SampleResult result3 = partialResults.get("resultThree");
+            if (result3 == null) {
+                result3 = activities.three();
+                partialResults.put("resultThree", result3);
+            }
+
+            SampleResult result4 = partialResults.get("resultFour");
+            if (result4 == null) {
+                result4 = activities.four();
+                partialResults.put("resultFour", result4);
+            }
+
+            // all activities have completed successfully
         } catch (ActivityFailure e) {
-            // Wait for the pause signal
+            log.info("Activity failed: {}", e.getMessage());
+
+            // Wait for the pause signal and the start the workflow from the beginning
+            log.info("Pausing workflow, waiting for 'resume' signal...");
             Workflow.await(() -> !awaitingPause);
 
-            Workflow.continueAsNew(input);
-            return new SampleResult("Workflow resumed, continue-as-new");
+            log.info("Resuming workflow by continuing as new...");
+            Workflow.continueAsNew(input, partialResults);
         }
+
         return new SampleResult("Workflow complete");
     }
-    
+
     @Override
     public void resume() {
+        log.info("Signal 'resume' received");
         awaitingPause = false;
     }
 
